@@ -14,7 +14,7 @@ env.update(dict(
     path='/home/dev/data/note',
     src='/home/dev/src',
     dist='/home/dev/dist',
-    repo='git@gitlab.com:xiaoku/note.git',
+    repo='git@github.com:endsh/coolnote.git',
     shell="/bin/bash -l -i -c",
     apps=['admin', 'web'],
 ))
