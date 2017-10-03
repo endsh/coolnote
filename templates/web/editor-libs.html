@@ -1,0 +1,138 @@
+{% macro render_editor_tmpl() %}
+    {% raw %}
+    <script id="tags-search-tmpl" type="text/x-jquery-tmpl"> 
+        {{each(i, tag) tags}}
+        {{if !tag.id}}
+        <li><a class="create-tag-item" href="javascript:;" data-name="${tag.name}">创建标签 <strong>${tag.name}</strong></tag></a></li>
+        {{else}}
+        <li><a class="tag-item" href="javascript:;" data-id="${tag.id}" data-name="${tag.name}"><strong>${word}</strong>${tag.suffix}</a></li>
+        {{/if}}
+        {{/each}}
+    </script>
+    <script id="alert-tmpl" type="text/x-jquery-tmpl">
+        <div class="alert alert-danger alert-dismissible fade in" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            ${msg}
+        </div>
+    </script>
+    {% endraw %}
+{% endmacro %}
+
+{% macro render_editor(id='') %}
+    <form class="form-horizontal editor-form" method="post" data-qid="{{ id }}">
+        <div class="form-group">
+            {{ form.title(class='form-control input-lg', placeholder="标题") }}
+        </div>
+        <div class="form-group editor-tags-box">
+            <select class="form-control editor-tags" id="tags" name="tags" placeholder="标签，如：php 可使用逗号,分号;分隔" multiple="multiple">
+                {% if question %}
+                    {% for tag in question.tags %}
+                    <option value="{{ tag.id }}">{{ tag.name }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+            <div class="tags-panel panel panel-default">
+                <ul class="nav nav-pills" role="tablist">
+                    {% for item in tags %}
+                    <li role="presentation"{% if loop.index == 1 %} class="active"{% endif %}><a href="#{{ item.tag }}" aria-controls="{{ item.tag }}" role="tab" data-toggle="tab">{{ item.tag }}</a></li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content">
+                    {% for item in tags %}
+                    <div role="tabpanel" class="tab-pane{% if loop.index == 1 %} active{% endif %}" id="{{ item.tag }}">
+                        {% for tag in item.subs %}
+                        <a class="tag" data-name="{{ tag.name }}" data-id="{{ tag.id }}" href="javascript:;">{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <ul class="tags-search-panel dropdown-menu"></ul>
+        </div>
+        <div class="form-group">{{ form.markdown() }}</div>
+        <div class="row">
+            <button type="submit" class="btn btn-primary btn-submit btn-lg pull-right">保存</button>
+        </div>
+    </form>
+    <div class="modal-box">
+        {{ render_editor_modal() }}
+    </div>
+{% endmacro %}
+
+{% macro create_tag_modal() %}
+<div class="modal" id="create-tag-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <form class="tag-form" action="/tags/create" method="POST">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="关闭"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">创建标签</h4>
+                </div>
+                <div class="modal-body">
+                        <input name="name" class="tag-name form-control" value="" placeholder="标签名称" type="text" style="margin-bottom: 20px;">
+                        <textarea name="desc" class="tag-desc form-control" placeholder="请对此标签补充一些描述资料, 以供他人参考" rows="5"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary btn-submit" data-loading-text="提交中...">确认</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_editor_modal() %}
+<div class="modal fade modal-insert-link">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-hidden="true">&times;</button>
+                <h4 class="modal-title">插入链接</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-globe"></i></span>
+                    <input id="input-insert-link" type="text" class="col-sm-5 form-control" 
+                        placeholder="http://example.com/" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal">取消</a>
+                <a href="#" class="btn btn-primary action-insert-link" data-dismiss="modal">插入</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-insert-image">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                    aria-hidden="true">&times;</button>
+                <h4 class="modal-title">插入图片</h4>
+            </div>
+            <div class="modal-body">
+                <form id="image-form" action="/images/upload" method="post" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-picture"></i></span>
+                        <input id="input-insert-image" autocomplete="off" type="text" class="col-sm-5 form-control"
+                            placeholder='粘贴图片链接，如 http://example.com/image.jpg' />
+                        <span class="input-group-btn">
+                            <div id="btn-image" autocomplete="off" class="btn btn-default" style="width:80px;padding:0;">
+                                <span style="padding: 6px 12px;display:inline-block;">选择图片</span>
+                                <input id="image-file" autocomplete="off" name="file" type="file" style="width:100%;height:34px;margin-top:-34px;opacity:0;cursor:pointer;">
+                            </div>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-default" data-dismiss="modal">取消</a>
+                <a href="#" class="btn btn-primary action-insert-image" data-dismiss="modal">插入</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

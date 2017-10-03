@@ -1,0 +1,13 @@
+{% extends "editor-base.html" %}
+{% block editor_title %}修改问题{% endblock %}
+
+
+{% block main %}
+    <div class="message"></div>
+    <div class="col-md-12">
+        {{ render_editor(question.id) }}
+    </div>
+
+    {{ create_tag_modal() }}
+    {{ render_editor_tmpl() }}
+{% endblock %}

@@ -1,0 +1,157 @@
+
+{% macro render_msg(msg, title='消息提示', style='info', btn='返回', url='javascript:history.go(-1);', show_btn=False) %}
+    <div class="weui_msg">
+        <div class="weui_icon_area"><i class="weui_icon_{{ style }} weui_icon_msg"></i></div>
+        <div class="weui_text_area">
+            <h2 class="weui_msg_title">{{ title }}</h2>
+            <p class="weui_msg_desc">{{ msg }}</p>
+        </div>
+        {% if show_btn %}
+        <div class="weui_opr_area">
+            <p class="weui_btn_area">
+                <a href="{{ url }}" class="weui_btn weui_btn_default">{{ btn }}</a>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro render_pages(pag) %}
+    {% if pag.has_pages %}
+        <ul class="pagination">
+        {% for page, link in pag.iter_links() %}
+            {% if page == pag.page %}
+            <li class="active"><a href="#">{{ page }} <span class="sr-only">(current)</span></a></li>
+            {% elif not link %}
+            <li class="disabled"><a href="#"><span>{{ page }}</span></a></li>
+            {% else %}
+            <li><a href="{{ link }}">{{ page }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{% macro navbar(active=None) %}
+	{% set navs = [
+		{'action':'questions', 'title': '算法', 'url': '/'},
+        {'action':'tools',      'title': '工具', 'url': '/tools'},
+		{'action':'interflow',		'title': '交流', 'url': '/interflow'},
+	] %}
+	{% for nav in navs %}
+		<li{% if nav.action == active %} class="active"{% endif %}>
+			<a href="{{ nav.url }}"
+				{%- if nav.target %} target="{{ nav.target }}{% endif -%}
+			">{{ nav.title }}</a>
+		</li>
+	{% endfor %}
+{% endmacro %}
+
+{% macro render_tag(tag) %}
+    <a title="{{ tag }}" href="{{ url_for('common.tag', name=tag) }}">{{ tag }}</a>
+{% endmacro %}
+
+{% macro render_section(tag, subs, questions) %}
+    <div class="section">
+        <div class="section-header">
+            <h2>{{ render_tag(tag) }}</h2>
+            <ul>
+                {% for tag in subs %}
+                <li>{{ render_tag(tag.name) }}</li>
+                {% endfor %}
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="section-body row">
+            {% for question in questions %}
+            <div class="col-md-4">
+                <div class="problem-item">
+                    <a class="title" href="{{ url_for('common.question', id=question.id) }}">
+                        {{ question.title }}
+                    </a>
+                    <p class="desc">{{ question.desc or '什么也没有' }}</p>
+                    <div class="tags">
+                        {% for tag in question.tags %}
+                            {{ render_tag(tag.name) }}
+                        {% endfor %}
+                    </div>
+                    <div class="meta">
+                        <span class="author">
+                            <a href="#">{{ question.user.nickname }}</a>
+                        </span>
+                        <span class="published">{{ question.modified | time2best }}</span>
+                        <span class="answers">{{ question.answers }}答案</span>
+                        <span class="views">{{ question.views }}浏览</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro render_user_box(user) %}
+    <div class="user-box">
+        <img class="avatar" src="{{ user.avatar.get_link(100, 100) }}">
+        <span class="nickname">{{ user.nickname }}</span>
+        <div class="meta">
+            <span class="questions">{{ user.questions }}问题</span>
+            <span class="answers">{{ user.answers }}回答</span>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro render_tags(title, tags) %}
+    {% if tags %}
+    <div class="side-section">
+        <div class="section-header">
+            <span class="section-title">{{ title }}</span>
+        </div>
+        <div class="tags">
+            {% for tag in tags %}
+                {{ render_tag(tag.name) }}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_questions(title, questions) %}
+    {% if questions %}
+    <div class="side-section">
+        <div class="section-header">
+            <span class="section-title">{{ title }}</span>
+        </div>
+        <div class="list-group">
+            {% for question in questions %}
+            <a class="list-group-item" title="{{ question.title }}" href="{{ url_for('common.question', id=question.id) }}">{{ question.title }}</a> 
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_answers(answers, num) %}
+    <div class="answer-list">
+    {% for answer in answers %}
+        {{ render_answer(answer, num - loop.index0) }}
+    {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro render_answer(answer, num) %}
+    <div class="answer-box">
+        <div class="meta">
+            <span class="user-meta">
+                <img class="avatar" src="{{ answer.user.avatar.get_link(40, 40) }}">
+                <span class="nickname">{{ answer.user.nickname }}</span>
+            </span>
+            <span class="published">{{ answer.modified | time2best }}</span>
+            <span class="line">{{ num }}楼</span>
+            {% if answer.user and answer.user == current_user %}
+                <a class="edit" href="{{ url_for('home.edit_answer', qid=answer.question.id,  id=answer.id) }}">修改</a>
+            {% endif %}
+        </div>
+        <div class="content likedown">{{ answer.content | safe }}</div>
+    </div>
+{% endmacro %}

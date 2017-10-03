@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% from "libs.html" import render_pages, render_tag, render_questions %}
+{% from "libs.html" import render_tags, render_answers, render_user_box with context %}
+{% from "editor-libs.html" import render_editor_modal with context %}
+
+{% block subtitle %}
+    {% if pag.page > 1 %}
+        {{ question.title }} - 第{{ pag.page }}页
+    {% else %}
+        {{ question.title }}
+    {% endif %}
+{% endblock %}
+
+{% block static_header %}
+    {{ static_header() }}
+    {{ static_header('editor') }}
+{% endblock %}
+
+{% block main %}
+    <div class="col-md-8">
+        <div class="question-box">
+            <h1 class="title">{{ question.title }}</h1>
+            <div class="meta">
+                {# <span class="author">
+                    <a href="#">{{ question.user.nickname }}</a>
+                </span> #}
+                <span class="published">{{ question.modified | time2best }}</span>
+                <span class="answers">{{ question.answers }}答案</span>
+                <span class="views">{{ question.views }}浏览</span>
+                {% if question.user and question.user == current_user %}
+                <a href="{{ url_for('home.edit_question', id=question.id) }}">修改</a>
+                {% endif %}
+            </div>
+            <div class="content likedown">{{ question.content | safe }}</div>
+        </div>
+
+        {% if pag.items %}
+        <div class="section">
+            <div class="section-header">
+                <h2><span>{{ question.answers }}回答</span></h2>
+                <span>{% if pag.page > 1 %}第{{pag.page}}页{% endif %}</span>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        {{ render_answers(pag.items, pag.total - (pag.page - 1) * pag.per_page) }}
+        <div class="text-center">{{ render_pages(pag) }}</div>
+        {% endif %}
+
+        {% if current_user.is_authenticated() %}
+        <div class="section-answer">
+            <h3>回答问题</h3>
+            <div class="message"></div>
+            <div class="col-md-12">
+                <form class="form-horizontal answer-form" method="post" data-qid="{{ question.id }}">
+                    <div class="form-group">
+                        {{ form.markdown(editor_class="simple-mode edit-mode") }}
+                    </div>
+                    <div class="row">
+                        <button type="submit" class="btn btn-primary btn-submit pull-right">提交答案</button>
+                    </div>
+                </form>
+                <div class="modal-box">
+                    {{ render_editor_modal() }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-4 side-bar">
+        {{ render_user_box(question.user) }}
+        {{ render_tags('标签', question.tags) }}
+        {{ render_questions('相关问题', related) }}
+    </div>
+{% endblock %}

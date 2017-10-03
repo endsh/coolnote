@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% from "editor-libs.html" import render_editor_tmpl, render_editor, create_tag_modal, render_editor_modal with context %}
+{%　block navbar_class %}navbar navbar-default{% endblock %}
+{% block navbar %}
+    <li><span>{% block editor_title %}{% endblock %}</span></li>
+{% endblock %}
+
+{% block static_header %}
+    {{ static_header() }}
+    {{ static_header('editor') }}
+{% endblock %}

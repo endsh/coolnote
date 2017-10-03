@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% from "libs.html" import render_section, render_pages %}
+
+{% block subtitle %}
+    {% if pag.page > 1 %}
+        {{ tag.name }} - 第{{ pag.page }}页
+    {% else %}
+        {{ tag.name }}
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {{ render_section(tag.name, subs, pag.items) }}
+    <div class="text-center">{{ render_pages(pag) }}</div>
+{% endblock %}

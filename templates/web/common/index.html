@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% from "libs.html" import render_section %}
+{% block navbar %}{{ navbar('questions') }}{% endblock %}
+
+{% block main %}
+    {% for item in data %}
+        {{ render_section(item.tag, item.subs, item.questions) }}
+    {% endfor %}
+{% endblock %}
